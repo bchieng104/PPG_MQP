@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">901848951225-0p224kofpkph9n2d3k0j407fqi2joogv.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://mqp-fws.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">901848951225</string>
+    <string name="google_api_key" translatable="false">AIzaSyA5kUqRxVm0Zb8b65Fs3nLg-Iz1F2aF2Eg</string>
+    <string name="google_app_id" translatable="false">1:901848951225:android:9b8a055c2af4f4c205ae68</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyA5kUqRxVm0Zb8b65Fs3nLg-Iz1F2aF2Eg</string>
+    <string name="google_storage_bucket" translatable="false">mqp-fws.appspot.com</string>
+    <string name="project_id" translatable="false">mqp-fws</string>
+</resources>

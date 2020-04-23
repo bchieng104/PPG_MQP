@@ -105,6 +105,12 @@ public class DeviceControlActivity extends Activity {
     public double[] ppg_array = new double[16384];
     public int ppg_array_index = 0;
 
+    // counter for long-term HRV
+    public int long_term_hrv_ctr = 0;
+    // array for long-term HRV
+    public Complex[] ppg_24_hours = new Complex[2359296]; // 8192*12*24 (24 hours summed up from 5 mins of consecutive data)
+    public Complex[] complex_ppg_arr = new Complex[8192];
+
     private Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
@@ -259,7 +265,9 @@ public class DeviceControlActivity extends Activity {
         heartRate.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                double heartRateValue = (double) dataSnapshot.getValue();
+                Object val = dataSnapshot.getValue();
+                double heartRateValue = Double.parseDouble(String.valueOf(val));
+//                double heartRateValue = (double) dataSnapshot.getValue();
 
                 Log.d(getClass().getName(), String.valueOf(heartRateValue));
                 hr_button.setText(String.valueOf(heartRateValue));
@@ -280,7 +288,9 @@ public class DeviceControlActivity extends Activity {
         hrv.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                double hrvValue = (double) dataSnapshot.getValue();
+                Object val = dataSnapshot.getValue();
+                double hrvValue = Double.parseDouble(String.valueOf(val));
+//                double hrvValue = (double) dataSnapshot.getValue();
                 hrv_button.setText(String.valueOf(hrvValue));
             }
 
@@ -294,7 +304,9 @@ public class DeviceControlActivity extends Activity {
         sp02.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                double sp02Value = (double) dataSnapshot.getValue();
+                Object val = dataSnapshot.getValue();
+                double sp02Value = Double.parseDouble(String.valueOf(val));
+//                double sp02Value = (double) dataSnapshot.getValue();
                 sp02_button.setText(String.valueOf(sp02Value));
             }
 
@@ -308,7 +320,9 @@ public class DeviceControlActivity extends Activity {
         respiratoryRate.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                double respiratoryRateValue = (double) dataSnapshot.getValue();
+                Object val = dataSnapshot.getValue();
+                double respiratoryRateValue = Double.parseDouble(String.valueOf(val));
+//                double respiratoryRateValue = (double) dataSnapshot.getValue();
                 rr_button.setText(String.valueOf(respiratoryRateValue));
             }
 
@@ -440,7 +454,7 @@ public class DeviceControlActivity extends Activity {
         if (data != null) {
             //mDataField.setText(data); - HAVE A CASE WHERE WE CUT TO 14999 BUT MCU IS TRANSMITING MORE AND THEN DELETE REST OF VALUES W ARE GETTING
             data = data.substring(0, data.indexOf(".")+3);
-            if((Double.valueOf(data) != ppg_array[ppg_array_index - 1]) ) {
+            if((ppg_array_index == 0) || (Double.valueOf(data) != ppg_array[ppg_array_index - 1])) {
 
                 ppg_array[ppg_array_index] = Double.valueOf(data); // Double...
 
@@ -451,12 +465,23 @@ public class DeviceControlActivity extends Activity {
             }
 
 
-            if (ppg_array_index == 10) {
+            if (ppg_array_index == 43) { // - 10 - MAKE IT 16384 -- or 16385??
 
                 String spo2 = String.valueOf(spo2_calculation(ppg_array)); // TODO: MAKE 4 FUNCTIONS WITH EACH HEALTH ALG AND CALL HERE!!!
                 String heart_rate = String.valueOf(hr_calculation(ppg_array));
                 String respiratory_rate = String.valueOf(rr_calculation(ppg_array));
-//                    String hrv = String.valueOf(hrv_calculation(ppg_array));
+                String hrv = String.valueOf(short_hrv_calculation(ppg_array));
+                if (long_term_hrv_ctr == 288) {
+                    String long_hrv = String.valueOf(long_term_hrv(ppg_24_hours));
+                    long_term_hrv_ctr = 0;
+                } else {
+                    for (int i = 0; i < 8192; i++) {
+                        complex_ppg_arr[i] = new Complex(ppg_array[i], 0);
+                    }
+                    int index_pos = long_term_hrv_ctr*8192;
+                    System.arraycopy(complex_ppg_arr, 0, ppg_24_hours, index_pos, 8192); // coy 8192 values at a time to pg_24 hours from ppg_array
+                    long_term_hrv_ctr++;
+                }
 
 
                 DateTime dateTime = new DateTime();
@@ -651,10 +676,10 @@ public class DeviceControlActivity extends Activity {
         double local_max_ir = 0;
         int red_local_max_index = 0;
         int ir_local_max_index = 0;
-        int Fs = 50; // sampling frequency
+        double Fs = 55; // sampling frequency
  //       int Fs = 1000;
         int array_length = 8192;
-        double freq_values[] = new double[4097];
+        double[] freq_values = new double[4097];
 
         // Copy RED and IR values received from our pulse oximeter to their corresponding
         // arrays to perform FFT
@@ -724,7 +749,7 @@ public class DeviceControlActivity extends Activity {
         //(A - B * Ratio)
         double SpO2_percentage = 110 - SpO2_ratio * 25;
 
-        return SpO2_percentage;
+        return (SpO2_percentage);
 
     }
 
@@ -732,10 +757,10 @@ public class DeviceControlActivity extends Activity {
     public double hr_calculation(double[] ppg_array_all) {
 
         Complex[] red_ppg_arr = new Complex[8192];
-        int Fs = 50; // sampling frequency
+        double Fs = 55; // sampling frequency
         //int Fs = 1000;
         int array_length = 8192;
-        double freq_values[] = new double[4097];
+        double[] freq_values = new double[4097];
         double local_max_red = 0;
         int red_local_max_index = 0;
         double heart_rate = 0;
@@ -775,7 +800,7 @@ public class DeviceControlActivity extends Activity {
 
         heart_rate = freq_values[red_local_max_index] * 60;
 
-        return heart_rate;
+        return (heart_rate);
     }
 
 
@@ -783,10 +808,10 @@ public class DeviceControlActivity extends Activity {
     public double rr_calculation(double[] ppg_array_all) {
 
         Complex[] red_ppg_arr = new Complex[8192];
-        int Fs = 50; // sampling frequency
+        double Fs = 55; // sampling frequency
         //int Fs = 1000;
         int array_length = 8192;
-        double freq_values[] = new double[4097];
+        double[] freq_values = new double[4097];
         double local_max_red = 0;
         int red_local_max_index = 0;
         double respiratory_rate = 0;
@@ -828,6 +853,169 @@ public class DeviceControlActivity extends Activity {
 
         respiratory_rate = freq_values[red_local_max_index] * 60;
 
-        return respiratory_rate;
+        return (respiratory_rate);
+    }
+
+
+    // Short-term Heart Rate Variability
+    public double[] short_hrv_calculation(double[] ppg_array_all) {
+
+        int minor_peak = 0;
+        boolean found_first_peak = false;
+        int peak_1_index = 0;
+        int peak_2_index = 0;
+        double[] peak_lengths = new double[8191];
+        int array_pointer = 0;
+        double Fs = 55;
+        double sequential_point_length = 1/Fs;
+
+        double SDNN = 0;
+        double COV = 0;
+        double SDSD = 0;
+        double RMSSD = 0;
+        double NN50 = 0;
+        double pNN50 = 0;
+
+
+        // Will use either one (whichever is more precise)
+        // Find length of NN Intervals (time) by locating peaks (local maxima) and
+        // using sampling frequency and array indices, calculate time period between intervals
+        for (int i = 1; i < 8192; i++) {  // OR 8192 , <16384
+
+            if ((minor_peak == 1) && (!found_first_peak)) {
+                if ((ppg_array_all[i] > ppg_array_all[i - 1]) && (ppg_array_all[i] > ppg_array_all[i + 1])) {
+                    peak_1_index = i;
+                    found_first_peak = true;
+                }
+
+            } else if (minor_peak == 2) {
+                    if ((ppg_array_all[i] > ppg_array_all[i-1]) && (ppg_array_all[i] > ppg_array_all[i+1])) {
+                        peak_2_index = i;
+                        // new array value
+                        peak_lengths[array_pointer] = (peak_2_index - peak_1_index) * sequential_point_length;
+                        array_pointer++;
+                        peak_1_index = peak_2_index;
+//                        peak_2_index = 0;
+                        minor_peak = 1;
+                    }
+
+            } else if ((ppg_array_all[i] > ppg_array_all[i-1]) && (ppg_array_all[i] > ppg_array_all[i+1])) {
+                    minor_peak++;
+            }
+
+        }
+
+        // Calculate SDNN
+        // TODO: Make helper function for Standard Deviation.
+        // first find mean
+        double total = 0;
+        for (int i = 0; i < peak_lengths.length; i++)
+        {
+            total += peak_lengths[i];
+        }
+        double mean = total/(peak_lengths.length);
+        // now calculate standard deviation
+        double sum = 0;
+        for (int i = 0; i < peak_lengths.length; i++)
+        {
+            sum += Math.pow((peak_lengths[i] - mean), 2);
+        }
+
+        SDNN = Math.sqrt(sum/(peak_lengths.length - 1));
+
+        // Calculate COV - normalized SDNN
+        COV = SDNN/mean;
+
+        // Calculate SDSD
+        double[] successive_NN_diffs = new double[8190];
+
+        for (int i=1; i<peak_lengths.length; i++) {
+            successive_NN_diffs[i-1] = Math.abs(peak_lengths[i-1] - peak_lengths[i]);
+        }
+
+        // first find mean
+        double total_for_diff = 0;
+        for (int i = 0; i < successive_NN_diffs.length; i++)
+        {
+            total_for_diff += successive_NN_diffs[i];
+        }
+        double mean_for_diff = total_for_diff/(successive_NN_diffs.length);
+        // now calculate standard deviation
+        double sum_for_std = 0;
+        for (int i = 0; i < successive_NN_diffs.length; i++)
+        {
+            sum_for_std += Math.pow((successive_NN_diffs[i] - mean_for_diff), 2);
+        }
+
+        SDSD = Math.sqrt(sum_for_std/(successive_NN_diffs.length - 1));
+
+        // Calculate RMSSD
+        double summation_squares = 0;
+        for (int i=0; i<successive_NN_diffs.length;i++) {
+            summation_squares += Math.pow(successive_NN_diffs[i], 2);
+        }
+
+        RMSSD = Math.sqrt(summation_squares/successive_NN_diffs.length);
+
+        // Calculate NN50
+        for (int i=0;i<successive_NN_diffs.length;i++) {
+            if (successive_NN_diffs[i] > 0.05) {
+                NN50++;
+            }
+        }
+        // Calculate pNN50
+        pNN50 = NN50/successive_NN_diffs.length;
+
+        double[] indices_array = {SDNN, COV, SDSD, RMSSD, NN50, pNN50};
+        return indices_array;
+    }
+
+    // Respiratory Rate
+    public double long_term_hrv(Complex[] half_ppg_array_all_24) {
+        int N = half_ppg_array_all_24.length;
+        int Fs = 55;
+        double psd_term= (double) 1/(Fs * N);
+        double freq_term = (double) Fs/N;
+        // Perform FFT
+        fft(half_ppg_array_all_24);
+        // Find PSD
+        double[] abs_ppg_arr = new double[(N/2)+1];
+        double[] corr_frequencies = new double[(N/2)+1];
+        for (int i=0; i<=(N/2); i++) {
+            abs_ppg_arr[i] = psd_term * half_ppg_array_all_24[i].abs();
+
+            if ((i!=0) || (i!=(N/2))) {
+                abs_ppg_arr[i] = 2*abs_ppg_arr[i];
+            }
+            // 0:Fs/N:Fs/2
+            corr_frequencies[i] = i * freq_term;
+        }
+
+        double local_max_sym = 0; // for sympathetic activity
+        int sym_local_max_index = 0;
+        double local_max_para = 0; // for parasympathetic activity
+        int para_local_max_index = 0;
+
+        for (int i = 1; i < (N/2); i++) {
+
+            // Sympathetic actiity
+            if ((corr_frequencies[i] >= 0.01) && (corr_frequencies[i] <= 0.15)) {
+                if (local_max_sym < abs_ppg_arr[i]) {
+                    local_max_sym = abs_ppg_arr[i];
+                    sym_local_max_index = i;
+                }
+            }
+
+            // Parasympathetic actiity
+            if ((corr_frequencies[i] >= 0.15) && (corr_frequencies[i] <= 0.5)) {
+                if (local_max_para < abs_ppg_arr[i]) {
+                    local_max_para = abs_ppg_arr[i];
+                    para_local_max_index = i;
+                }
+            }
+        }
+
+        double hrv_pwr_ratio = local_max_sym/local_max_para; // LF/HF
+        return hrv_pwr_ratio;
     }
 }

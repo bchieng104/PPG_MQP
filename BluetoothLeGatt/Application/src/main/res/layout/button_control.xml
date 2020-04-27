@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorBackground"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:orientation="vertical"
     tools:context=".DeviceControlActivity">
 
-<!--    <Button-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Write Char"-->
-<!--        android:id="@+id/button2"-->
-<!--        android:onClick="onClickWrite" />-->
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:text="Write Char"-->
+    <!--        android:id="@+id/button2"-->
+    <!--        android:onClick="onClickWrite" />-->
 
-<!--    <Button-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Read Char"-->
-<!--        android:id="@+id/button"-->
-<!--        android:onClick="onClickRead" />-->
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:text="Read Char"-->
+    <!--        android:id="@+id/button"-->
+    <!--        android:onClick="onClickRead" />-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,36 +28,36 @@
         android:weightSum="1">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="0.5">
+            android:layout_weight="0.004"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
+                android:layout_marginLeft="5sp"
                 android:layout_marginTop="40sp"
-                android:layout_marginLeft="5sp"
-                android:textSize="18sp"
-                android:text="Name" />
+                android:text="Name"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="55sp"
                 android:layout_marginLeft="5sp"
-                android:textSize="18sp"
-                android:text="Phone number" />
+                android:layout_marginTop="55sp"
+                android:text="Phone number"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="0.5">
+            android:layout_weight="0.5"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -68,40 +68,48 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="0.75">
+                    android:layout_weight="0.75"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:layout_marginTop="40sp"
+                        android:layout_marginTop="35sp"
+                        android:text="SP02"
                         android:textColor="@android:color/white"
-                        android:text="SP02" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
                         android:layout_marginTop="55sp"
+                        android:text="HR"
                         android:textColor="@android:color/white"
-                        android:text="HR" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:layout_marginTop="55sp"
+                        android:layout_marginTop="35sp"
+                        android:text="Short HRV"
                         android:textColor="@android:color/white"
-                        android:text="HRV" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:layout_marginTop="55sp"
+                        android:layout_marginTop="35sp"
+                        android:text="RR"
                         android:textColor="@android:color/white"
-                        android:text="RR" />
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="45sp"
+                        android:text="Long HRV"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
 
@@ -116,9 +124,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30sp"
-                        android:text="SP02"
                         android:layout_marginRight="5sp"
-                        android:onClick="onClick_sp02" />
+                        android:onClick="onClick_sp02"
+                        android:text="SP02" />
 
                     <Button
                         android:id="@+id/heartRate"
@@ -126,8 +134,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30sp"
                         android:layout_marginRight="5sp"
-                        android:text="Heart Rate"
-                        android:onClick="onClick_hr" />
+                        android:onClick="onClick_hr"
+                        android:text="Heart Rate" />
 
                     <Button
                         android:id="@+id/HRV"
@@ -135,8 +143,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30sp"
                         android:layout_marginRight="5sp"
-                        android:text="HRV"
-                        android:onClick="onClick_hrv" />
+                        android:onClick="onClick_hrv"
+                        android:text="Short-term HRV" />
 
                     <Button
                         android:id="@+id/respiratoryRate"
@@ -144,8 +152,17 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30sp"
                         android:layout_marginRight="5sp"
-                        android:text="RR"
-                        android:onClick="onClick_rr" />
+                        android:onClick="onClick_rr"
+                        android:text="RR" />
+
+                    <Button
+                        android:id="@+id/long_term_hrv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30sp"
+                        android:layout_marginRight="5sp"
+                        android:onClick="onClick_longHRV"
+                        android:text="Long-term HRV" />
 
                 </LinearLayout>
 
@@ -156,12 +173,11 @@
     </LinearLayout>
 
 
-
     <TextView
+        android:id="@+id/data_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/no_data"
-        android:id="@+id/data_value"
-        android:textColor="@android:color/white"/>
+        android:textColor="@android:color/white" />
 
 </LinearLayout>

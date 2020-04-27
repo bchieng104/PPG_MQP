@@ -3,11 +3,123 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".graphs.HRVGraphActivity">
+    android:background="@color/colorBackground"
+    android:orientation="vertical"
+    tools:context=".HRVGraphActivity">
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/line_chart_hrv"
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:text="Write Char"-->
+    <!--        android:id="@+id/button2"-->
+    <!--        android:onClick="onClickWrite" />-->
+
+    <!--    <Button-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:text="Read Char"-->
+    <!--        android:id="@+id/button"-->
+    <!--        android:onClick="onClickRead" />-->
+
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp" />
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/SDNN"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_SDNN"
+                    android:text="SDNN" />
+
+                <Button
+                    android:id="@+id/COV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_COV"
+                    android:text="COV" />
+
+                <Button
+                    android:id="@+id/SDSD"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_SDSD"
+                    android:text="SDSD" />
+
+                <Button
+                    android:id="@+id/RMSSD"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_RMSSD"
+                    android:text= "RMSSD" />
+
+                <Button
+                    android:id="@+id/NN50"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_NN50"
+                    android:text= "NN50" />
+
+
+                <Button
+                    android:id="@+id/pNN50"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30sp"
+                    android:layout_marginRight="5sp"
+                    android:onClick="onClick_pNN50"
+                    android:text= "pNN50" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>
+
+
+
+
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    tools:context=".graphs.HRVGraphActivity">-->
+
+<!--    <com.github.mikephil.charting.charts.LineChart-->
+<!--        android:id="@+id/line_chart_hrv"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="400dp" />-->
+
+<!--</LinearLayout>-->

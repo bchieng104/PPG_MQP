@@ -40,8 +40,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.example.android.bluetoothlegatt.database.Database;
-import com.example.android.bluetoothlegatt.graphs.HRVGraphActivity;
 import com.example.android.bluetoothlegatt.graphs.HeartRateGraphActivity;
+import com.example.android.bluetoothlegatt.graphs.LongHRVGraphActivity;
 import com.example.android.bluetoothlegatt.graphs.RRGraphActivity;
 import com.example.android.bluetoothlegatt.graphs.SP02GraphActivity;
 import com.google.firebase.FirebaseApp;
@@ -56,8 +56,6 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.example.android.bluetoothlegatt.R;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -74,11 +72,13 @@ public class DeviceControlActivity extends Activity {
     final DatabaseReference hrv = myRef.child("HRV");
     final DatabaseReference sp02 = myRef.child("SP02");
     final DatabaseReference respiratoryRate = myRef.child("RespiratoryRate");
+    final DatabaseReference long_term_hrv = myRef.child("LongHRV");
 
     Button hr_button;
     Button hrv_button;
     Button sp02_button;
     Button rr_button;
+    Button long_hrv_button;
 
     //--------------------------------------------------------------------------
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
@@ -103,7 +103,9 @@ public class DeviceControlActivity extends Activity {
     //--------------------------------------------------------------------------------------------------------
     Handler handler = new Handler();
     public double[] ppg_array = new double[16384];
+    public String[] packets = new String[3277];
     public int ppg_array_index = 0;
+    public int packets_index = 0;
 
     // counter for long-term HRV
     public int long_term_hrv_ctr = 0;
@@ -138,7 +140,7 @@ public class DeviceControlActivity extends Activity {
 //                }
 
             }
-            handler.postDelayed(this, 1);
+            handler.postDelayed(this, 0);
         }
     };
 
@@ -250,6 +252,7 @@ public class DeviceControlActivity extends Activity {
         hrv_button  = findViewById(R.id.HRV);
         sp02_button  = findViewById(R.id.SP02);
         rr_button  = findViewById(R.id.respiratoryRate);
+        long_hrv_button = findViewById(R.id.long_term_hrv); // xml ADD!
 
         // Sets up UI references.
         /*
@@ -285,21 +288,21 @@ public class DeviceControlActivity extends Activity {
             }
         });
 
-        hrv.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Object val = dataSnapshot.getValue();
-                double hrvValue = Double.parseDouble(String.valueOf(val));
-//                double hrvValue = (double) dataSnapshot.getValue();
-                hrv_button.setText(String.valueOf(hrvValue));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Failed to read value
-                Log.w("file", "Failed to read value.", databaseError.toException());
-            }
-        });
+//        hrv.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                Object val = dataSnapshot.getValue();
+//                double hrvValue = Double.parseDouble(String.valueOf(val));
+////                double hrvValue = (double) dataSnapshot.getValue();
+//                hrv_button.setText(String.valueOf(hrvValue));
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                // Failed to read value
+//                Log.w("file", "Failed to read value.", databaseError.toException());
+//            }
+//        });
 
         sp02.addValueEventListener(new ValueEventListener() {
             @Override
@@ -324,6 +327,23 @@ public class DeviceControlActivity extends Activity {
                 double respiratoryRateValue = Double.parseDouble(String.valueOf(val));
 //                double respiratoryRateValue = (double) dataSnapshot.getValue();
                 rr_button.setText(String.valueOf(respiratoryRateValue));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+                Log.w("file", "Failed to read value.", databaseError.toException());
+            }
+        });
+
+
+        long_term_hrv.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Object val = dataSnapshot.getValue();
+                double long_term_hrv_value = Double.parseDouble(String.valueOf(val));
+//                double respiratoryRateValue = (double) dataSnapshot.getValue();
+                long_hrv_button.setText(String.valueOf(long_term_hrv_value));
             }
 
             @Override
@@ -452,28 +472,68 @@ public class DeviceControlActivity extends Activity {
 
     private void displayData(String data) {
         if (data != null) {
-            //mDataField.setText(data); - HAVE A CASE WHERE WE CUT TO 14999 BUT MCU IS TRANSMITING MORE AND THEN DELETE REST OF VALUES W ARE GETTING
-            data = data.substring(0, data.indexOf(".")+3);
-            if((ppg_array_index == 0) || (Double.valueOf(data) != ppg_array[ppg_array_index - 1])) {
+            //mDataField.setText(data); // HAVE A CASE WHERE WE CUT TO 14999 BUT MCU IS TRANSMITING MORE AND THEN DELETE REST OF VALUES W ARE GETTING
 
-                ppg_array[ppg_array_index] = Double.valueOf(data); // Double...
+            data = data.substring(0, data.lastIndexOf('.')+3);
+            if((packets_index == 0) || !(data.equals(packets[packets_index - 1]))) {
+
+                packets[packets_index] = data; // Double...
 
                 //String spo2_val = String.valueOf(ppg_array[ppg_array_index]);
                 mDataField.setText(data);
-                ppg_array_index+=1;
+                packets_index+=1;
 
             }
 
 
-            if (ppg_array_index == 43) { // - 10 - MAKE IT 16384 -- or 16385??
+//            data = data.substring(0, data.indexOf(".")+3);
+//            if((ppg_array_index == 0) || (Double.valueOf(data) != ppg_array[ppg_array_index - 1])) {
+//
+//                ppg_array[ppg_array_index] = Double.valueOf(data); // Double...
+//
+//                //String spo2_val = String.valueOf(ppg_array[ppg_array_index]);
+//                mDataField.setText(data);
+//                ppg_array_index+=1;
+//
+//            }
+
+
+            if (packets_index == 5) { // =>3278? - 10 - MAKE IT 16384 -- or 16385??
+                String[] array_of_elements;
+                for (int i=0; i<21; i+=5) { // 16383 <packet_index or <packets.length
+                    array_of_elements = packets[i/5].split("B", -2);
+                    if (i == 16380) {
+                        ppg_array[i] = Double.valueOf(array_of_elements[0].replaceAll(" ",""));
+                        ppg_array[i+1] = Double.valueOf(array_of_elements[1].replaceAll(" ",""));
+                        ppg_array[i+2] = Double.valueOf(array_of_elements[2].replaceAll(" ",""));
+                        ppg_array[i+3] = Double.valueOf(array_of_elements[3].replaceAll(" ",""));
+
+                    } else {
+
+                        ppg_array[i] = Double.valueOf(array_of_elements[0].replaceAll(" ",""));
+                        ppg_array[i+1] = Double.valueOf(array_of_elements[1].replaceAll(" ",""));
+                        ppg_array[i+2] = Double.valueOf(array_of_elements[2].replaceAll(" ",""));
+                        ppg_array[i+3] = Double.valueOf(array_of_elements[3].replaceAll(" ",""));
+                        ppg_array[i+4] = Double.valueOf(array_of_elements[4].replaceAll(" ",""));
+                    }
+
+
+                }
 
                 String spo2 = String.valueOf(spo2_calculation(ppg_array)); // TODO: MAKE 4 FUNCTIONS WITH EACH HEALTH ALG AND CALL HERE!!!
                 String heart_rate = String.valueOf(hr_calculation(ppg_array));
                 String respiratory_rate = String.valueOf(rr_calculation(ppg_array));
-                String hrv = String.valueOf(short_hrv_calculation(ppg_array));
+                double[] short_hrv_arr;
+                short_hrv_arr = short_hrv_calculation(ppg_array);
+                String SDNN = String.valueOf(short_hrv_arr[0]); // indices_array = {SDNN, COV, SDSD, RMSSD, NN50, pNN50}
+                String COV = String.valueOf(short_hrv_arr[1]);
+                String SDSD = String.valueOf(short_hrv_arr[2]);
+                String RMSSD = String.valueOf(short_hrv_arr[3]);
+                String NN50 = String.valueOf(short_hrv_arr[4]);
+                String pNN50 = String.valueOf(short_hrv_arr[5]);
+                String long_hrv = "0";
                 if (long_term_hrv_ctr == 288) {
-                    String long_hrv = String.valueOf(long_term_hrv(ppg_24_hours));
-                    long_term_hrv_ctr = 0;
+                    long_hrv = String.valueOf(long_term_hrv(ppg_24_hours));
                 } else {
                     for (int i = 0; i < 8192; i++) {
                         complex_ppg_arr[i] = new Complex(ppg_array[i], 0);
@@ -486,7 +546,12 @@ public class DeviceControlActivity extends Activity {
 
                 DateTime dateTime = new DateTime();
                 try {
-                    Database.getInstance().addListEntries("a" + spo2 + "b" + heart_rate + "c" + respiratory_rate + "d" + hrv + "e" + dateTime.getMillis() + "f");
+                    if (long_term_hrv_ctr == 288) {
+                        Database.getInstance().addListEntries("a" + spo2 + "b" + heart_rate + "c" + respiratory_rate + "d" + SDNN + "e" + dateTime.getMillis() + "f" + COV + "g" + SDSD + "h" + RMSSD + "i" + NN50 + "j" + pNN50 + "k" + long_hrv + "l");
+                        long_term_hrv_ctr = 0;
+                    } else {
+                        Database.getInstance().addListEntries("a" + spo2 + "b" + heart_rate + "c" + respiratory_rate + "d" + SDNN + "e" + dateTime.getMillis() + "f" + COV + "g" + SDSD + "h" + RMSSD + "i" + NN50 + "j" + pNN50 + "k");
+                    }
                 } catch (Exception e) {
                     Log.e(getClass().getName(), e.getMessage());
                 }
@@ -618,6 +683,11 @@ public class DeviceControlActivity extends Activity {
 
     public void onClick_rr(View view) {
         Intent intent = new Intent(DeviceControlActivity.this, RRGraphActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClick_longHRV(View view) {
+        Intent intent = new Intent(DeviceControlActivity.this, LongHRVGraphActivity.class);
         startActivity(intent);
     }
 
@@ -965,6 +1035,11 @@ public class DeviceControlActivity extends Activity {
         }
         // Calculate pNN50
         pNN50 = NN50/successive_NN_diffs.length;
+        if ((pNN50 < 0.01) && (pNN50 > 0)) {
+            pNN50 = 0;
+        }
+
+
 
         double[] indices_array = {SDNN, COV, SDSD, RMSSD, NN50, pNN50};
         return indices_array;

@@ -24,16 +24,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
 
-public class SP02GraphActivity extends AppCompatActivity {
+
+public class LongHRVGraphActivity extends AppCompatActivity{
 
     LineChart lineChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sp02_graph);
+        setContentView(R.layout.activity_long_hrv_graph);
 
-        lineChart = findViewById(R.id.line_chart_sp02);
+        lineChart = findViewById(R.id.line_chart_long_hrv);
     }
 
     @Override
@@ -44,11 +45,8 @@ public class SP02GraphActivity extends AppCompatActivity {
             public void success(ArrayList<Map<String, Object>> data) {
                 ArrayList<Entry> values1 = new ArrayList<>();
 
-                for (Map<String, Object> entry : data)
-                {
-//                    long hour = (long) entry.get("hour");
-                    double hour = Double.parseDouble(String.valueOf(entry.get("hour")));
-//                    double minute = Double.parseDouble(String.valueOf(entry.get("minute")))/100;
+                for (Map<String, Object> entry : data) {
+                    long hour = (long) entry.get("hour");
 
                     String num = String.valueOf(entry.get("minute"));
                     double[] digits = new double[num.length()];
@@ -67,11 +65,12 @@ public class SP02GraphActivity extends AppCompatActivity {
                     }
 
                     double time = hour + minute;
+
                     double ratio = Double.parseDouble(String.valueOf(entry.get("ratio")));
-//                    double ratio = (double) entry.get("ratio");
+//                    double score = (double) entry.get("score");
                     Log.e(getClass().getName(), "TIME: " + time);
 
-                    values1.add(new Entry((float) time , (float) ratio)); // int, int
+                    values1.add(new Entry((float) time, (float) ratio));
                 }
 
                 values1.sort(new Comparator<Entry>() {
@@ -85,10 +84,10 @@ public class SP02GraphActivity extends AppCompatActivity {
                     }
                 });
 
-                LineDataSet d1 = new LineDataSet(values1, "Blood Oxygen Level " + data.size() + ", (1)");
+                LineDataSet d1 = new LineDataSet(values1, "Long-term HRV " + data.size() + ", (1)");
                 d1.setLineWidth(2.5f);
                 d1.setCircleRadius(4.5f);
-                d1.setHighLightColor(Color.rgb(0, 0, 0));
+                d1.setHighLightColor(Color.rgb(0, 255, 0));
                 d1.setDrawValues(false);
 
                 ArrayList<ILineDataSet> sets = new ArrayList<>();
@@ -106,31 +105,39 @@ public class SP02GraphActivity extends AppCompatActivity {
         });
     }
 
-    private void getData(final IResponse<ArrayList<Map<String, Object>>> sp02_response)
-    {
-        DatabaseReference SP02_list = FirebaseDatabase.getInstance().getReference().child("SP02List");
-        SP02_list.addValueEventListener(new ValueEventListener() {
+    private void getData(final IResponse<ArrayList<Map<String, Object>>> Long_HRV_response) {
+        DatabaseReference Long_HRVList_list = FirebaseDatabase.getInstance().getReference().child("LongHRVList");
+        Long_HRVList_list.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> SP02_children = dataSnapshot.getChildren();
+                Iterable<DataSnapshot> Long_HRVList_children = dataSnapshot.getChildren();
                 ArrayList<Map<String, Object>> mapList = new ArrayList<>();
-                for (DataSnapshot child : SP02_children)
-                {
+                for (DataSnapshot child : Long_HRVList_children) {
                     Map<String, Object> map = (Map<String, Object>) child.getValue();
+                    Log.e(getClass().getName(), map.toString());
+//                    double hour = Double.parseDouble(String.valueOf(map.get("hour")));
                     long hour = (long) map.get("hour");
                     double ratio = Double.parseDouble(String.valueOf(map.get("ratio")));
-//                    double ratio = (double) map.get("ratio"); // long, long
+//                    double score = (double) map.get("ratio");
                     Log.e(getClass().getName(), "hour: " + hour + ", ratio: " + ratio);
                     mapList.add(map);
                 }
-                sp02_response.success(mapList);
+
+                Long_HRV_response.success(mapList); // TODO: make success function have arguments for rgb and title of legend
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                sp02_response.fail();
+                Long_HRV_response.fail();
             }
         });
+
+        // databse reference
+        // add value event listener
+        // .
+        // .
+        // .
     }
+
 
 }

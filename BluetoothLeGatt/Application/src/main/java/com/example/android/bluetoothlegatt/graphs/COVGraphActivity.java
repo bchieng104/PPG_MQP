@@ -7,8 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.android.bluetoothlegatt.R;
 import com.example.android.bluetoothlegatt.IResponse;
+import com.example.android.bluetoothlegatt.R;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -24,16 +24,16 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
 
-public class SP02GraphActivity extends AppCompatActivity {
+public class COVGraphActivity extends AppCompatActivity {
 
     LineChart lineChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sp02_graph);
+        setContentView(R.layout.activity_cov);
 
-        lineChart = findViewById(R.id.line_chart_sp02);
+        lineChart = findViewById(R.id.line_chart_cov);
     }
 
     @Override
@@ -44,11 +44,8 @@ public class SP02GraphActivity extends AppCompatActivity {
             public void success(ArrayList<Map<String, Object>> data) {
                 ArrayList<Entry> values1 = new ArrayList<>();
 
-                for (Map<String, Object> entry : data)
-                {
-//                    long hour = (long) entry.get("hour");
-                    double hour = Double.parseDouble(String.valueOf(entry.get("hour")));
-//                    double minute = Double.parseDouble(String.valueOf(entry.get("minute")))/100;
+                for (Map<String, Object> entry : data) {
+                    long hour = (long) entry.get("hour");
 
                     String num = String.valueOf(entry.get("minute"));
                     double[] digits = new double[num.length()];
@@ -67,11 +64,11 @@ public class SP02GraphActivity extends AppCompatActivity {
                     }
 
                     double time = hour + minute;
-                    double ratio = Double.parseDouble(String.valueOf(entry.get("ratio")));
-//                    double ratio = (double) entry.get("ratio");
+
+                    double score = Double.parseDouble(String.valueOf(entry.get("score")));
                     Log.e(getClass().getName(), "TIME: " + time);
 
-                    values1.add(new Entry((float) time , (float) ratio)); // int, int
+                    values1.add(new Entry((float) time, (float) score));
                 }
 
                 values1.sort(new Comparator<Entry>() {
@@ -85,10 +82,10 @@ public class SP02GraphActivity extends AppCompatActivity {
                     }
                 });
 
-                LineDataSet d1 = new LineDataSet(values1, "Blood Oxygen Level " + data.size() + ", (1)");
+                LineDataSet d1 = new LineDataSet(values1, "COV " + data.size() + ", (1)");
                 d1.setLineWidth(2.5f);
                 d1.setCircleRadius(4.5f);
-                d1.setHighLightColor(Color.rgb(0, 0, 0));
+                d1.setHighLightColor(Color.rgb(244, 117, 117));
                 d1.setDrawValues(false);
 
                 ArrayList<ILineDataSet> sets = new ArrayList<>();
@@ -106,29 +103,28 @@ public class SP02GraphActivity extends AppCompatActivity {
         });
     }
 
-    private void getData(final IResponse<ArrayList<Map<String, Object>>> sp02_response)
-    {
-        DatabaseReference SP02_list = FirebaseDatabase.getInstance().getReference().child("SP02List");
-        SP02_list.addValueEventListener(new ValueEventListener() {
+    private void getData(final IResponse<ArrayList<Map<String, Object>>> COV_response) {
+        DatabaseReference COVList_list = FirebaseDatabase.getInstance().getReference().child("COVList");
+        COVList_list.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> SP02_children = dataSnapshot.getChildren();
+                Iterable<DataSnapshot> COVList_children = dataSnapshot.getChildren();
                 ArrayList<Map<String, Object>> mapList = new ArrayList<>();
-                for (DataSnapshot child : SP02_children)
-                {
+                for (DataSnapshot child : COVList_children) {
                     Map<String, Object> map = (Map<String, Object>) child.getValue();
+                    Log.e(getClass().getName(), map.toString());
                     long hour = (long) map.get("hour");
-                    double ratio = Double.parseDouble(String.valueOf(map.get("ratio")));
-//                    double ratio = (double) map.get("ratio"); // long, long
-                    Log.e(getClass().getName(), "hour: " + hour + ", ratio: " + ratio);
+                    double score = Double.parseDouble(String.valueOf(map.get("score")));
+                    Log.e(getClass().getName(), "hour: " + hour + ", score: " + score);
                     mapList.add(map);
                 }
-                sp02_response.success(mapList);
+
+                COV_response.success(mapList);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                sp02_response.fail();
+                COV_response.fail();
             }
         });
     }

@@ -47,10 +47,30 @@ public class HeartRateGraphActivity extends AppCompatActivity {
                 for (Map<String, Object> entry : data)
                 {
                     long hour = (long) entry.get("hour");
-                    double bpm = (double) entry.get("bpm");
-                    Log.e(getClass().getName(), "HOUR: " + hour);
 
-                    values1.add(new Entry((int) hour, (float) bpm));
+                    String num = String.valueOf(entry.get("minute"));
+                    double[] digits = new double[num.length()];
+                    for (int k = 0 ; k < num.length() ; k++) {
+                        digits[k] = Double.parseDouble(num.substring(k,k+1)) ;
+                        if (k == 0) {
+                            digits[k] = digits[k] * 0.15;
+                        } else if (k == 1) {
+                            digits[k] = digits[k] * 0.015;
+                        }
+                    }
+
+                    double minute = 0;
+                    for (int j = 0 ; j < digits.length ; j++) {
+                        minute += digits[j];
+                    }
+
+                    double time = hour + minute;
+
+                    double bpm = Double.parseDouble(String.valueOf(entry.get("bpm")));
+//                    double bpm = (double) entry.get("bpm");
+                    Log.e(getClass().getName(), "TIME: " + time);
+
+                    values1.add(new Entry((float) time, (float) bpm));
                 }
 
                 values1.sort(new Comparator<Entry>() {
@@ -64,10 +84,10 @@ public class HeartRateGraphActivity extends AppCompatActivity {
                     }
                 });
 
-                LineDataSet d1 = new LineDataSet(values1, "New DataSet " + data.size() + ", (1)");
+                LineDataSet d1 = new LineDataSet(values1, "Heart Rate " + data.size() + ", (1)");
                 d1.setLineWidth(2.5f);
                 d1.setCircleRadius(4.5f);
-                d1.setHighLightColor(Color.rgb(244, 117, 117));
+                d1.setHighLightColor(Color.rgb(255, 0, 0));
                 d1.setDrawValues(false);
 
                 ArrayList<ILineDataSet> sets = new ArrayList<>();
@@ -97,7 +117,8 @@ public class HeartRateGraphActivity extends AppCompatActivity {
                 {
                     Map<String, Object> map = (Map<String, Object>) child.getValue();
                     long hour = (long) map.get("hour");
-                    double bpm = (double) map.get("bpm");
+                    double bpm = Double.parseDouble(String.valueOf(map.get("bpm")));
+//                    double bpm = (double) map.get("bpm");
                     Log.e(getClass().getName(), "hour: " + hour + ", bpm: " + bpm);
                     mapList.add(map);
                 }
